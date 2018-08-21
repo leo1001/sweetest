@@ -11,7 +11,7 @@ class Global:
     def init(self, desired_caps, server_url):
         self.desired_caps = desired_caps
         self.server_url = server_url
-        self.platform = desired_caps['platformName']
+        self.platform = desired_caps.get('platformName', '')
         self.browserName = desired_caps.get('browserName', '')
         self.var = {}
         self.snippet = {}
@@ -20,6 +20,7 @@ class Global:
         self.http = {}
         self.baseurl = {}
         self.driver = ''
+        self.action = {}
 
     def set_driver(self):
         if self.platform.lower() == 'desktop':
@@ -53,6 +54,7 @@ class Global:
         if self.platform.lower() == 'android':
             from appium import webdriver as appdriver
             self.driver = appdriver.Remote(self.server_url, self.desired_caps)
+
 
     def close(self):
         self.driver.close()

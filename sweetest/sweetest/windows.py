@@ -1,4 +1,5 @@
 from sweetest.globals import g
+from sweetest.log import logger
 
 
 class Windows:
@@ -17,6 +18,8 @@ class Windows:
         self.pages = {}
         # 新开窗口标志
         self.new_window_flag = True
+        # App context
+        self.current_context = 'NATIVE_APP'
 
     def switch_window(self, page):
         if self.new_window_flag:
@@ -40,16 +43,28 @@ class Windows:
                     g.driver.close()
                     self.windows.pop('HOME')
                 # 再切换到需要操作的窗口
-                g.driver.switch_to_window(self.windows[self.pages[page]])
+                tw = self.windows[self.pages[page]]
+                logger.info('--- Switch Windows: %s' % repr(tw))
+                g.driver.switch_to_window(tw)
                 self.current_window = self.pages[page]
+                logger.info('--- Current Windows: %s' % repr(self.current_window))
 
     def switch_frame(self, frame):
         if frame.strip():
-            frame = frame.replace('，', ',').split(',')
+            frame = [x.strip() for x in frame.split('|')]
             if frame != self.frame:
                 if self.frame != 0:
                     g.driver.switch_to.default_content()
                 for f in frame:
+                    logger.info('--- Frame Value:  %s' % repr(f))
+                    if f.startswith('#'):
+                        f = int(f[1:])
+                    elif '#' in f:
+                        from sweetest.testcase import elements_format
+                        from sweetest.locator import locating_element
+                        element = elements_format('通用',f)[2]
+                        f = locating_element(element)
+                    logger.info('--- Switch Frame: %s' % repr(f))
                     g.driver.switch_to.frame(f)
                 self.frame = frame
         else:
@@ -107,9 +122,21 @@ class Windows:
 
             all_handles = g.driver.window_handles
             for handle in all_handles:
-                #  切换到每一个窗口,并关闭它
+                # 切换到每一个窗口,并关闭它
                 g.driver.switch_to_window(handle)
                 g.driver.close()
+
+    def switch_context(self, context):
+        if context.strip() == '':
+            context = 'NATIVE_APP'
+        logger.info('--- ALL   Contexts:%s' % g.driver.contexts)
+        logger.info('--- Input  Context:%s' % repr(context))
+        if context != self.current_context:
+            if context == '':
+                context = None
+            logger.info('--- Switch Context:%s' % repr(context))
+            g.driver.switch_to.context(context)
+            self.current_context = context
 
 
 w = Windows()

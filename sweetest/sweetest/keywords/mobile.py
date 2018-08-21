@@ -145,11 +145,13 @@ def set_value(step):
 def click(step):
     element = step['element']
     if isinstance(element, str):
-        element_location = locating_element(element, 'CLICK')
+        #element_location = locating_element(element, 'CLICK')
+        element_location = locating_element(element)
         element_location.click()
     elif isinstance(element, list):
         for _e in element:
-            element_location = locating_element(_e, 'CLICK')
+            #element_location = locating_element(_e, 'CLICK')
+            element_location = locating_element(_e)
             element_location.click()
             sleep(0.5)
     sleep(0.5)
@@ -168,6 +170,13 @@ def click(step):
                 g.var[key] = element_location.text
         else:
             g.var[key] = element_location.get_attribute(output[key])
+
+    # if w.current_context.startswith('WEBVIEW'):
+    #     # 判断是否打开了新的窗口，并将新窗口添加到所有窗口列表里
+    #     all_handles = g.driver.window_handles
+    #     for handle in all_handles:
+    #         if handle not in w.windows.values():
+    #             w.register(step, handle)
 
 
 def tap(step):
@@ -210,6 +219,13 @@ def tap(step):
                 g.var[key] = element_location.text
         else:
             g.var[key] = element_location.get_attribute(output[key])
+
+    # if w.current_context.startswith('WEBVIEW'):
+    #     # 判断是否打开了新的窗口，并将新窗口添加到所有窗口列表里
+    #     all_handles = g.driver.window_handles
+    #     for handle in all_handles:
+    #         if handle not in w.windows.values():
+    #             w.register(step, handle)
 
 
 def press_keycode(step):
@@ -280,6 +296,42 @@ def line_unlock(step):
             action = action.press(x=key[k][0], y=key[k][1]).wait(duration*1000)
         action.move_to(x=key[k][0], y=key[k][1]).wait(duration*1000)
     action.release().perform()
+
+
+def rocker(step):
+    element = step['element']
+    duration = float(step['data'].get('持续时间', 0.3))
+    rocker_name = step['data'].get('摇杆', 'rocker')
+    release = step['data'].get('释放', False)
+
+    if isinstance(element, str):
+        if element:
+            element = [element]
+        else:
+            element = []
+
+    postions = []
+    for _e in element:
+        _e = _e.replace('，', ',')
+        p = _e.split(',')
+        postions.append(p)
+
+    # 如果 action 中么有此摇杆名，则是新的遥感
+    if not g.action.get(rocker_name):
+        g.action[rocker_name] = TouchAction(g.driver)
+        action = g.action[rocker_name].press(x=postions[0][0], y=postions[0][1]).wait(duration*1000)
+        # 新摇杆的第一个点已操作，需要删除
+        postions.pop(0)
+    # 依次操作
+    for i in range(len(postions)):
+        g.action[rocker_name].move_to(x=postions[i][0], y=postions[i][1]).wait(duration*1000)
+
+    if release:
+        # 释放摇杆，并删除摇杆
+        g.action[rocker_name].release().perform()
+        del g.action[rocker_name]
+    else:
+        g.action[rocker_name].perform()
 
 
 def scroll(step):
@@ -365,3 +417,33 @@ def hide_keyboard(step):
 
 def shake(step):
     g.driver.shake()
+
+
+def tab_name(step):
+    element = step['element']
+    name = step['data']['text']
+    # 从所有窗口中查找给定元素，如果查询到就命名，否则报错
+    all_handles = g.driver.window_handles
+    logger.info('All Handles: %s' % all_handles)
+
+    flag = False
+    for handle in all_handles:
+        #logger.info('Page Source: %s \n%s' % (handle, g.driver.page_source))
+        #logger.info('All Windows: %s' %w.windows)
+        if handle not in w.windows.values():
+            # 切换至此窗口
+            g.driver.switch_to_window(handle)
+            try:
+                # 成功定位到关键元素
+                element_location = locating_element(element, 'CLICK')
+                # 添加到窗口资源池 g.windows
+                w.windows[name] = handle
+                # 把当前窗口名字改为新窗口名称
+                w.current_window = name
+                flag = True
+                logger.info('Current Window: %s' % repr(name))
+                logger.info('Current Handle: %s' % repr(handle))
+            except Exception as exception:
+                pass
+    if not flag:
+        raise Exception('Tab Name Fail: the element:%s in all tab is not found' %element)

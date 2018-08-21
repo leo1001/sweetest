@@ -18,7 +18,11 @@ web_keywords = {
     '双击': 'DOUBLE_CLICK',
     'DOUBLE_CLICK': 'DOUBLE_CLICK',
     '拖拽': 'DRAG_AND_DROP',
-    'DRAG_AND_DROP': 'DRAG_AND_DROP'
+    'DRAG_AND_DROP': 'DRAG_AND_DROP',
+    '脚本': 'SCRIPT',
+    'SCRIPT': 'SCRIPT',
+    '对话框': 'MESSAGE',
+    'MESSAGE': 'MESSAGE'
 }
 
 common_keywords = {
@@ -53,6 +57,8 @@ mobile_keywords = {
     'LINE': 'LINE',
     '划线解锁': 'LINE_UNLOCK',
     'LINE_UNLOCK': 'LINE_UNLOCK',
+    '摇杆': 'ROCKER',
+    'ROCKER': 'ROCKER',
     '滚动': 'SCROLL',  # iOS 专用
     'SCROLL': 'SCROLL',
     '拖拽': 'DRAG_AND_DROP',
@@ -70,7 +76,9 @@ mobile_keywords = {
     '放大': 'ZOOM',
     'ZOOM': 'ZOOM',
     '隐藏键盘': 'HIDE_KEYBOARD',  # iOS 专用
-    'HIDE_KEYBOARD': 'HIDE_KEYBOARD'
+    'HIDE_KEYBOARD': 'HIDE_KEYBOARD',
+    '命名标签页': 'TAB_NAME',
+    'TAB_NAME': 'TAB_NAME'
 }
 
 all_keywords = {}
