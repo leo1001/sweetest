@@ -138,16 +138,20 @@ def notcheck(step):
 def input(step):
     data = step['data']
     element = step['element']
-    element_location = locating_element(element, text=data['text'])
+    element_location = locating_element(element)
 
-    if isinstance(data['text'], tuple):
-        element_location.send_keys(*data['text'])
-    elif element_location:
-        if step['data'].get('清除文本', '') == '否' or step['data'].get('clear', '').lower() == 'no':
-            pass
-        else:
-            element_location.clear()
-        element_location.send_keys(data['text'])
+    if step['data'].get('清除文本', '') == '否' or step['data'].get('clear', '').lower() == 'no':
+        pass
+    else:
+        element_location.clear()
+
+    for key in data:
+        if key.startswith('text'):
+            if isinstance(data[key], tuple):
+                element_location.send_keys(*data[key])
+            elif element_location:
+                element_location.send_keys(data[key])
+            sleep(0.5)
 
 
 def click(step):
@@ -224,6 +228,19 @@ def drag_and_drop(step):
     sleep(0.5)
 
 
+def swipe(step):
+    actions = ActionChains(g.driver)
+    element = step['element']
+    data = step['data']
+
+    source = locating_element(element)
+    x = data.get('x', 0)
+    y = data.get('y', 0)
+    actions.drag_and_drop_by_offset(source, x, y)
+    actions.perform()
+    sleep(0.5)
+
+
 def script(step):
     element = step['element']
     el, value = e.get(element)
@@ -231,7 +248,7 @@ def script(step):
 
 def message(step):
     data = step['data']
-    text=data.get('text', '')
+    text = data.get('text', '')
     element = step['element']
     el, value = e.get(element)
 
@@ -244,3 +261,24 @@ def message(step):
         g.driver.switch_to_alert().accept()
     logger.info('--- Switch Frame: Alert')
     w.frame = 'Alert'
+
+
+def upload(step):
+    import win32com.client
+
+    data = step['data']
+    element = step['element']
+    element_location = locating_element(element)
+    file_path = data.get('text', '') or data.get('file', '')
+
+    element_location.click()
+    sleep(3)
+    shell = win32com.client.Dispatch("WScript.Shell")
+    shell.Sendkeys(file_path)
+    sleep(2)
+    shell.Sendkeys("{ENTER}")
+    sleep(2)
+
+
+def refresh(step):
+    g.driver.refresh()

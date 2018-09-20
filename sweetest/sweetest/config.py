@@ -19,10 +19,16 @@ web_keywords = {
     'DOUBLE_CLICK': 'DOUBLE_CLICK',
     '拖拽': 'DRAG_AND_DROP',
     'DRAG_AND_DROP': 'DRAG_AND_DROP',
+    '滑动': 'SWIPE',
+    'SWIPE': 'SWIPE',
     '脚本': 'SCRIPT',
     'SCRIPT': 'SCRIPT',
     '对话框': 'MESSAGE',
-    'MESSAGE': 'MESSAGE'
+    'MESSAGE': 'MESSAGE',
+    '上传文件': 'UPLOAD',
+    'UPLOAD': 'UPLOAD',
+    '刷新': 'REFRESH',
+    'REFRESH': 'REFRESH'
 }
 
 common_keywords = {

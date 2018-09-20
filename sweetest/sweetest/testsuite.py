@@ -5,9 +5,10 @@ from sweetest.log import logger
 
 
 class TestSuite:
-    def __init__(self, testsuite, report):
+    def __init__(self, testsuite, report, conditions={}):
         self.testsuite = testsuite
         self.report = report
+        self.conditions = conditions
 
         # base 在整个测试套件中首先执行一次
         self.base_testcase = {}
@@ -70,6 +71,16 @@ class TestSuite:
         # 1.执行用例
         for testcase in self.testsuite:
 
+            # 根据筛选条件，把不需要执行的测试用例跳过
+            flag = False
+            for k,v in self.conditions.items():
+                if not isinstance(v, list):
+                    v = [v]
+                if testcase[k] not in v:
+                    testcase['result'] = '-'
+                    flag = True
+            if flag:
+                continue
 
             # xml 测试报告-测试用例初始化
             if testcase['flag'] != 'N':
@@ -83,7 +94,7 @@ class TestSuite:
             else:
                 testcase['result'] = 'Skip'
                 # case.skip('Skip', 'Autotest Flag is N')
-                logger.warn('Run the testcase: %s|%s Skipped, because the flag=N or the condition=snippet' % (
+                logger.info('Run the testcase: %s|%s Skipped, because the flag=N or the condition=snippet' % (
                     testcase['id'], testcase['title']))
                 continue
 
@@ -139,8 +150,6 @@ class TestSuite:
         # 2.清理环境
         try:
             if g.platform.lower() in ('desktop',):
-                for handle in w.windows.values():
-                    g.driver.switch_to_window(handle)
-                    g.driver.close()
+                w.close()
         except:
             logger.exception('Clear the env is fail')
